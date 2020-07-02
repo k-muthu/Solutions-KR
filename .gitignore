@@ -1,0 +1,6 @@
+#ignore all .out files
+*.out
+
+#ignore temporary input and output files
+input
+output
