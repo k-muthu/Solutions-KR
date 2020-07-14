@@ -2,8 +2,6 @@
 #include<limits.h>
 
 #define MAXLINE 1000
-#define MIN 1
-#define NOTMIN 0
 
 /*
 This program implements myitob(int n, char s[], int b).
@@ -14,6 +12,7 @@ representaion of the integer in base b.
 void myitob(int n, char s[], int base);
 void reverse(char s[]);
 int mystrlen(char s[]);
+int positive(int n);
 
 int main(){
     int base, n;
@@ -41,49 +40,23 @@ void reverse(char s[]){
     }
 }
 
-void myitob(int n, char s[], int base){
-    int j, c, sign, state = NOTMIN;
+int positive(int n){
+    return (n > 0) ? n : -n;
+}
 
-    if(n == INT_MIN){
-        state = MIN;
-        sign = -1;
-        n = INT_MAX;
-    }
-    else if(n < 0){
-        n = -n;
-        sign = -1;
-    }
-    else
-        sign = 1;
+void myitob(int n, char s[], int base){
+    int j, c, sign;
+    sign = n;
 
     j = 0;
     do {
-        c = n % base + '0';
+        c = positive(n % base) + '0';
         s[j++] = (c > '9') ? (c + 'A' - '9' - 1) : c; 
 
-    }while((n /= base) > 0);
+    }while(n /= base);
     
-    if(sign == -1)
+    if(sign < 0)
         s[j++] = '-';
-    if(state){
-        if(!(base & (base - 1))){
-            for(j = 0; s[j + 1] != '-'; ++j){
-                s[j] = '0';
-            }
-            if(base == 2){
-                s[j++] = '0';
-                s[j++] = '0';
-                s[j++] = '1';
-                s[j++] = '-';
-            }
-            else{
-                ++s[j++];
-            }
-        }
-        else{
-            ++s[0];
-        }
-    }
 
     s[j] = '\0';
     reverse(s);    

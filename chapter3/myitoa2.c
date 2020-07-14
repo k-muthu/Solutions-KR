@@ -2,8 +2,6 @@
 #include<limits.h>
 
 #define MAXLINE 1000
-#define MIN 1
-#define NOTMIN 0
 
 /*
 This program implements myitoa(int n, char s[], int width).
@@ -13,6 +11,7 @@ Converts a given integer to a string with the given width size.
 void myitoa(int n, char s1[], int width);
 int mystrlen(char s[]);
 void reverse(char s[]);
+int positive(int n);
 
 int main(){
     int n = 456;
@@ -21,44 +20,6 @@ int main(){
     myitoa(n, s1, width);
     printf("%s\n", s1);
     return 0;
-}
-
-void myitoa(int n, char s1[], int width){
-    int j, sign, state = NOTMIN;
-    if(n == INT_MIN){
-        n = INT_MAX;
-        sign = -1;
-        state = MIN;
-    }
-    else if(n < 0){
-        sign = -1;
-        n = -n;
-    }
-    else
-        sign = 1;
-
-    j = 0;
-    do {
-        s1[j++] = (n % 10) + '0';
-        --width;
-    }while((n /= 10) > 0);
-
-    if(state){
-        ++s1[0];
-    }
-
-    if(sign == -1){
-        s1[j++] = '-';
-        --width;
-    }
-        
-    while(width--){
-        s1[j++] = ' ';
-    }
-
-    s1[j] = '\0';
-    reverse(s1);
-    
 }
 
 int mystrlen(char s[]){
@@ -75,4 +36,31 @@ void reverse(char s[]){
         s[forward] = s[backward];
         s[backward] = c;
     }
+}
+
+int positive(int n){
+    return (n > 0) ? n : -n;
+}
+
+void myitoa(int n, char s1[], int width){
+    int j, sign;
+    sign = n;
+
+    j = 0;
+    do {
+        s1[j++] = positive(n % 10) + '0';
+        --width;
+    }while((n /= 10) > 0);
+
+    if(sign < 0){
+        s1[j++] = '-';
+        --width;
+    }
+        
+    while(width--){
+        s1[j++] = ' ';
+    }
+
+    s1[j] = '\0';
+    reverse(s1);    
 }
