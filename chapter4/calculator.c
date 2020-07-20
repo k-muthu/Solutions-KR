@@ -10,7 +10,7 @@
 int getop(char s[]);
 void push(double number);
 double pop(void);
-double top();
+void printtop(void);
 
 int main(){
     int type;
@@ -43,9 +43,19 @@ int main(){
                 else
                     printf("error : Trying to divide by zero");
                 break;
+
+            case '%' : 
+                op2 = pop();
+                push((int)pop() % (int)op2);
+                break;
             
             case '\n' :
                     printf("Answer : %g\n", pop());
+                    break;
+            
+            defult : 
+                printf("Unknown operation");
+                break;
         }
     }
 
@@ -73,13 +83,12 @@ double pop(void){
     }
 }
 
-double top(){
+void printtop(void){
     if(sp){
-        return stack[sp - 1];
+        printf("Top of Stack : %g\n", stack[sp - 1]);
     }
     else{
-        printf("stack empty, nothing to print");
-        return 0.0;
+        printf("stack empty");
     }
 }
 
@@ -90,11 +99,19 @@ int getop(char s[]){
     int i, c;
     while((s[0] = c = getch()) == ' ' || c == '\t');
     s[1] = '\0';
-    if(!isdigit(c) && c != '.')
+
+    if(c == '-'){
+        if(isdigit(c = getch()))
+            ungetch(c);
+        else
+            return '-';
+    }
+
+    if(!isdigit(c) && c != '.' && c!= '-')
         return c;
 
-    i = 0;
-    if(isdigit(c))
+    i = (c == '-') ? 1 : 0;
+    if(isdigit(c) || c == '-')
         while(isdigit(s[++i] = c = getch()));
 
     if(c == '.')
