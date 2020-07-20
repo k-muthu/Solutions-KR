@@ -4,7 +4,7 @@
 
 /*
 myatof : converts string s to double
-Note : This is not a part of any excercise
+Excercise : 4-2
 */
 
 double myatof(char input[]);
@@ -20,7 +20,7 @@ assume the number to be printed is 123.45e-2
 when using scientific notation %g is equivalent to %e and %G is equivalent to %F.
 */
 int main(){
-    char input[] = "123.45e-2";
+    char input[] = "123.45";
     double num = myatof(input);
     printf("%g\n", num);
     return 0;
@@ -43,7 +43,7 @@ double myatof(char input[]){
         result = (result * 10) + (input[i] - '0');
         power *= 10.0; 
     }
-    power = 1 / power ;
+    power = 1.0 / power ;
     if(input[i] == 'e' || input[i] == 'E')
         ++i;
     powersign = (input[i] == '-') ? -1 : 1;
@@ -63,7 +63,6 @@ double mypow(double base, double pow){
     double result = 1.0;
     int sign = 1;
     double i;
-    printf("%g\n", pow);
     if(pow < 0){
         sign = -1;
         pow = -pow;
@@ -71,7 +70,6 @@ double mypow(double base, double pow){
     while(pow--){
         result *= base; 
     }
-    printf("%g\n", result);
     return (sign) ? (1/result) : result;
 }
 

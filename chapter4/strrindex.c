@@ -18,7 +18,7 @@ int main(){
     char input[MAXLINE];
     int len;
     while(mygetline(input, MAXLINE) > 0){
-            printf("%d\n", strrindex(input, pattern));
+        printf("%d\n", strrindex(input, pattern));
     }
     return 0;
 }
