@@ -14,7 +14,6 @@ int operation = 0;
 int getop(char s[]);
 void push(double number);
 double pop(void);
-int isstackempty(void);
 void printtop(void);
 void clearstack(void);
 void swaptop2(void);
@@ -206,13 +205,6 @@ void duplicatestack(void){
     else{
         printf("stack empty\n");
     }
-}
-
-int isstackempty(void){
-    if(!sp)
-        return 1;
-    else 
-        return 0;
 }
 
 int getch(void);
