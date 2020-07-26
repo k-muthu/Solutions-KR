@@ -21,6 +21,8 @@ void duplicatestack(void);
 int functions(char s[]);
 int compare(char s1[], char s2[]);
 void initializer(int a[], int value, int length);
+void unget(char s[]);
+int mystrlen(char s[]);
 
 int main(){
     int type;
@@ -319,4 +321,19 @@ void initializer(int a[], int value, int length){
     int i;
     for(i = 0; i < length; ++i)
         a[i] = value;
+}
+
+int mystrlen(char s[]){
+    int len = 0;
+    while(s[len++] != '\0');
+    return len;
+}
+
+/* Excercise 4-7 unget(s) should use getch rather than having access to */
+void unget(char s[]){
+    int len = mystrlen(s);
+    int j;
+    for(j = len; j > -1; --j){
+        ungetch(s[j]);
+    }
 }
