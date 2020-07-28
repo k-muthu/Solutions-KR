@@ -264,6 +264,7 @@ int getop(char s[]){
     return NUMBER;
 }
 
+/*Excercise 4-9 buffer is an integer array rather than a character array to handle EOF*/
 char buffer[BUFFERSIZE];
 int bufp = 0;   /* The next free buffer index */
 
