@@ -1,0 +1,8 @@
+Excercise 4-1 : strrindex.c
+Excercise 4-2 : myatof.c
+Excercise 4-3 to 4-7 : calculator.c
+Excercise 4-8, 4-9 : calculator1.c
+Excercise 4-10 : calculator2.c
+Excercise 4-11 : The main calculator program is split into 5 files
+stack.c, getch.c, getop.c, main.c, calc.h
+All these files should be compiled for main.c to work.
