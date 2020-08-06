@@ -12,7 +12,7 @@ void mystrcat(char input[], char tobeadded[]);
 
 int main(){
     char input[MAXLINE];
-    char original[] = "Github support is";
+    char original[] = "support is";
     char tobeadded[] = " so slow in replying to mails\n";
     int i;
     for(i = 0; original[i] != '\0'; ++i){
