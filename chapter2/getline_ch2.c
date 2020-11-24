@@ -1,47 +1,48 @@
-#include<stdio.h>
+#include <stdio.h>
 
-#define MAXLINE 1000
+#define MAXLINE 40
 
-/*
-This program implements get line 
-without using any logical operators
-*/
+int modgetline(char line[], int max);
 
-int mygetline(char line[], int max);
+int main()
+{
+	char line[MAXLINE + 1];
+	while (modgetline(line, MAXLINE + 1) > 0)
+		printf("%s", line);
 
-int main(){
-    char line[MAXLINE];
-    int len;
-    while( (len = mygetline(line, MAXLINE)) > 0){
-        printf("%s", line);
-    }
-    return 0;
+	return 0;
 }
 
-int mygetline(char line[], int max){
-    int len, i;
-    int c;
-    for(i = 0; i < max - 1; ++i){
-        c = getchar();
-        line[i] = c;
-        if(c == '\n'){
-            len = i + 1;
-            line[i + 1] = '\0';
-            i = max - 1;
-        }
-        else if(c == EOF){
-            line[i] = '\0';
-            len = i;
-            i = max -1;
-        }
-    }
-    // for(len = 0; ((len < max - 1) * ((c = getchar()) != EOF) * (c != '\n')) > 0; ++len){
-    //     line[len] = c;
-    // }
-    if(c == '\n'){
-        line[len] = '\n';
-        ++len;
-    }
-    line[len] = '\0';
-    return len;
+/* modgetline : doesnt use && or || in the normal getline function */
+int modgetline(char line[], int max)
+{
+	int c;
+	int i, cont;
+	
+	i = 0;
+	cont = 1; /* cont : loop variable that is set when all 3 conditions of getline are met */
+	while (cont != 0) {
+		if (i < max - 1) {
+			if ((c = getchar()) != EOF) {
+				if (c != '\n')
+					line[i] = c;
+				else{
+					line[i] = '\n';
+					++i;
+					line[i] = '\0';
+					cont = 0;
+				}
+			}
+			else{
+				cont = 0;
+				line[i] = '\0';
+			}
+		}
+		else{
+			line[i] = '\0';
+			cont = 0;
+		}
+		++i;
+	}
+	return i - 1;
 }
