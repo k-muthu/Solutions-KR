@@ -1,48 +1,53 @@
-#include<stdio.h>
+#include <stdio.h>
 
-/* 
-This program converts a string of hexadecimal 
-digits to its decimal equivalent
-*/
+unsigned int myhtoi(char line[]);
+unsigned int mylen(char line[]);
 
-int myhtoi(char input[]);
-int returnint(char s);
-
-int main(){
-    char input[] = "0x11F";
-    int output;
-    output = myhtoi(input);
-    printf("The decimal equivalent of %s is %d\n", input, output);
-    return 0;
+int main()
+{
+	char line[] = "0xFF2";
+	printf("%u\n", myhtoi(line));
 }
 
-int returnint(char s){
-    int output = -1;
-    if(s >= 'a' && s <= 'f'){
-        output = 9 + (s - 'a') + 1;
-    }
-    else if(s >= 'A' && s<= 'F'){
-        output = 9 + (s - 'A') + 1;
-    }
-    else if(s >= '0' && s<= '9'){
-        output = s - '0';
-    }
-    return output;
+/* myhtoi : converts hex input into unsigned ints */
+unsigned int myhtoi(char line[])
+{
+	int c;
+	unsigned int i;
+	unsigned int length;
+	unsigned int num; /* num : variable that holds the result */
+
+	num = 0;
+	length = mylen(line);
+
+	/* checks if 0x or 0X is part of the input */
+	if (length >= 2) {
+		if (line[0] == '0' && (line[1] == 'x' || line[1] == 'X'))
+			i = 2;
+		else if (line[0] == 'x' || line[0] == 'X')
+			i = 1;
+		else
+			i = 0;
+	}
+	else
+		i = 0;
+	while ((c = line[i]) != '\0') {
+		if ( c >= '0' && c <= '9')
+			c = c - '0';
+		else if (c >= 'a' && c <= 'f')
+			c = c - 'a' + 10;
+		else if (c >= 'A' && c <= 'F')
+			c = c - 'A' + 10;
+		num = 16 * num + c;
+		++i;
+	}
+	return num;
 }
 
-int myhtoi(char input[]){
-    int output = 0;
-    int length = 0;
-    int pow = 1;
-    int index_to_stop = 0;
-    while(input[length] != '\0')
-        ++length;
-    if(input[0] == '0' && (input[1] == 'x' || input[1] == 'X'))
-        index_to_stop = 2;
-    while(length > index_to_stop){
-        output += returnint(input[length - 1]) * pow;
-        pow = pow * 16;
-        length = length - 1;
-    }
-    return output;
+unsigned int mylen(char line[])
+{
+	unsigned int i;
+
+	for (i = 0; line[i] != '\0'; ++i);
+	return i;
 }
