@@ -1,45 +1,27 @@
-#include<stdio.h>
+#include <stdio.h>
 
-#define FOUND 1
-#define NOTFOUND 0
-
-/*
-This program implements the any(str1, str2) function
-This function returns the first index in string 1 where 
-any of string 2s' character is found
-*/
-
-int presentin(char s1[], char a);
 int any(char s1[], char s2[]);
 
-int main(){
-    char s1[] = "hi there, it looks like its going to rain today";
-    char s2[] = "h";
-    printf("%d\n", any(s1, s2));
-    return 0;
+int main()
+{
+	char s1[] = "the index of character x is 8\n";
+	char s2[] = "x";
+	printf("s1 : %s", s1);
+	printf("s2 : %s\n", s2);
+	printf("%d : the first position in s1 of any character in s2\n", any(s1, s2));
 }
 
-int presentin(char s[], char a){
-    int result = 0;
-    int j = 0;
-    while(s[j] != '\0'){
-        if(s[j] == a)
-            result = 1;
-        ++j;
-    }
-    return result;
-}
+/* any : returns the first position, in s1, of any character in s2 */
+int any(char s1[], char s2[])
+{
+	int pos;
+	int i, j;
 
-int any(char s1[], char s2[]){
-    int result = -1;
-    int i = 0;
-    int state = NOTFOUND;
-    while(!state && s1[i] != '\0'){
-        if(presentin(s2, s1[i])){
-            result = i;
-            state = FOUND;
-        }
-        ++i;
-    }
-    return result;
+	pos = -1;
+	for (i = 0; s1[i] != '\0' && pos == -1; ++i) {
+		for (j = 0; s2[j] != '\0' && s1[i] != s2[j]; ++j);
+		if (s2[j] != '\0')
+			pos = i;
+	}
+	return pos;
 }
