@@ -1,33 +1,24 @@
-#include<stdio.h>
+#include <stdio.h>
 
-/*
-This program implements bitcount(n)
-It orints the number of ones in binary
-representation of n
-*/
+unsigned int bitcount(unsigned int num);
 
-int bitcount(unsigned n);
+int main()
+{
+	unsigned int num = 255;
 
-int main(){ 
-    int n = 127;
-    printf("%d\n", bitcount(n));
+	printf("%u\n", bitcount(num));
+	return 0;
 }
 
-int bitcount(unsigned n){
-    int result = 0;
-    while(n != 0){
-        ++result;
-        n &= (n - 1);
-    }
-    return result;
-}
+/* bitcount : returns the position of the leftmost bit that is set to 1 */
+unsigned int bitcount(unsigned int num)
+{
+	unsigned int count;
 
-/*
-considering a 2's complement notation,
-n and n-1 differ by a value of 1
-so say n = 0111 (7) -> n-1 = 0110
-n & (n - 1) = 0110
-n = 0110 and n-1 = 0101
-n & (n - 1) = 0100
-etc.
-*/
+	count = 0;
+	while (num != 0) {
+		++count;
+		num &= num - 1;
+	}
+	return count;
+}
