@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-#define MAXLINE 28
+#define MAXLINE 48
 
 int mygetline(char line[], int max);
-void escape(char s[], char t[]);
+void esctoreal(char s[], char t[]);
 
 int main()
 {
@@ -12,31 +12,38 @@ int main()
 	int len;
 
 	while ((len = mygetline(line, MAXLINE))) {
-		escape(t, line);
+		esctoreal(t, line);
 		printf("%s", t);
 	}
 }
 
-/* escape : replaces whitespace characters with their visible escape sequences */
-void escape(char s[], char t[])
+/* esctoreal : replaces escape sequences with their whitespace characters*/
+void esctoreal(char s[], char t[])
 {
 	int i, j;
 
 	i = j = 0;
 	while (t[i] != '\0') {
-		switch (t[i]) {
-			case '\n' :
-				s[j++] = '\\';
-				s[j++] = 'n';
-				break;
-			case '\t' :
-				s[j++] = '\\';
-				s[j++] = 't';
-				break;
-			default :
-				s[j++] = t[i];
-				break;
+		if (t[i] == '\\') {
+			++i;
+			switch (t[i]) {
+				case 'n' :
+					s[j++] = '\n';
+					break;
+				case 't' :
+					s[j++] = '\t';
+					break;
+				case '\\' :
+					s[j++] = '\\';
+					break;
+				default :
+					s[j++] = '\\';
+					s[j++] = t[i];
+					break;
+			}
 		}
+		else
+			s[j++] = t[i];
 		++i;
 	}
 	s[j] = '\0';
