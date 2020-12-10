@@ -1,61 +1,63 @@
-#include<stdio.h>
+#include <stdio.h>
+#include <ctype.h>
 
-#define MAXLINE 1000
-#define FOUND 1
-#define NOTFOUND 0
+#define MAXLINE 30
 
-/*
-This program implements expand(s1, s2) function.
-Takes the string s1 and expands all shorthand notations
-and copies it to s2.
-For example a-z will be converted to abc...z
-*/
+char expanded[MAXLINE];
 
 int mygetline(char line[], int max);
-int expand(char s1[], char s2[]);
+void expand(char s[], char t[]);
 
-int main(){
-    char s1[MAXLINE];
-    char s2[MAXLINE];
-    mygetline(s1, MAXLINE);
-    expand(s1, s2);
-    printf("%s", s2);
-    return 0;
+int main()
+{
+	char line[MAXLINE];
+	while ((mygetline(line, MAXLINE))) {
+		printf("line : %s", line);
+		expand(expanded, line);
+		printf("%s", expanded);
+	}
+}
+/* expand : expands all shorthand notations in t while copying it to string s */
+void expand(char s[], char t[])
+{
+	int i, j, k;
+
+	for (i = 0, j = 0; t[i] != '\0'; ++i) {
+		/* check for a shorthand notation */
+		if (t[i] == '-') {
+			/* check if the '-' is a leading or trailing character of the line */
+			if ((i != 0) && (t[i + 1] != '\n') && (t[i + 1] != '\0')) {
+				++i;
+				/* shorthand notation is expanded only for a-z, A-Z, 0-9 */
+				if ((isdigit(t[i-2]) && isdigit(t[i])) || (isalpha(t[i-2]) && isalpha(t[i])))
+					/* shorthand notation is expanded in this loop */
+					for (k = t[i - 2] + 1; k <= t[i]; ++k)
+						s[j++] = k;
+				else{
+					s[j++] = '-';
+					s[j++] = t[i];
+				}
+			}
+			else
+				s[j++] = t[i];
+		}
+		else
+			s[j++] = t[i];
+	}
+	s[j] = '\0';
 }
 
-int mygetline(char line[], int max){
-    int length = 0;
-    int c, i;
-    for(i = 0; i < max && (c = getchar()) != EOF && c != '\n'; ++i){
-        line[i] = c;
-    }
-    if(c == '\n'){
-        line[i++] = '\n';
-    }
-    line[i] = '\0';
-    return i;
-}
+int mygetline(char line[], int max)
+{
+	int i, c;
 
-int expand(char s1[], char s2[]){
-    int i, j, c, state = NOTFOUND, k;
-    for(i = j = 0; (c = s1[i]) != '\0';){
-        if(c == '-'){
-            if(i == 0 || s1[i+1] == '\n'){
-                s2[j++] = '-';
-            }
-            else{
-                for(k = s1[i-1] + 1; k <= s1[i+1]; ++k){
-                    s2[j] = k;
-                    ++j;
-                }
-                ++i;
-            }
-        }
-        else{
-            s2[j++] = c;
-        }
-        ++i;
-    }
-    s2[j] = c;
-    return j;
+	i = 0;
+	while ((i < max - 1) && (c = getchar()) != EOF && c != '\n')
+		line[i++] = c;
+
+	if (c == '\n')
+		line[i++] = c;
+
+	line[i] = '\0';
+	return i;
 }
