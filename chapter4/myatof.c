@@ -1,84 +1,61 @@
-#include<stdio.h>
+#include <stdio.h>
 
-#define MAXLINE 1000
+double myatof(char s[]);
 
-/*
-myatof : converts string s to double
-Excercise : 4-2
-*/
+int main()
+{
+	char s[] = "1456.23e-03";
 
-double myatof(char input[]);
-int whitespace(char c);
-int digit(char c);
-double mypow(double base, double power);
-
-/*Note : for printing floating point numbers there are 3 specifiers
-assume the number to be printed is 123.45e-2
-%f : print the number in fractional format i.e. for the above number itll print 1.2345
-%e or %E : print the number in scientific notation i.e for above number itll print 1.2345e-04(%e), 1.2345E-04(%E)
-%g or %G : if a number is in a certain range itll print in fractional format otherwise itll use scientific notation
-when using scientific notation %g is equivalent to %e and %G is equivalent to %F.
-*/
-int main(){
-    char input[] = "123.45";
-    double num = myatof(input);
-    printf("%g\n", num);
-    return 0;
+	printf("number : %g\n", myatof(s));
+	return 0;
 }
 
-double myatof(char input[]){
-    double result, power, exponent;
-    int i, sign, powersign;
-    powersign = 1;
-    for(i = 0; whitespace(input[i]); ++i);
-    sign = (input[i] == '-') ? -1 : 1;
-    if(input[i] == '+' || input[i] == '-')
-        ++i;
-    for(result = 0.0; digit(input[i]) != '\0'; ++i){
-        result = (result * 10) + (input[i] - '0');
-    }
-    if(input[i] == '.')
-        ++i;
-    for(power = 1.0; digit(input[i]); ++i){
-        result = (result * 10) + (input[i] - '0');
-        power *= 10.0; 
-    }
-    power = 1.0 / power ;
-    if(input[i] == 'e' || input[i] == 'E')
-        ++i;
-    powersign = (input[i] == '-') ? -1 : 1;
+/* myatof : returns the double equivalent of the string */
+double myatof(char s[])
+{
+	int i, sign, exp_sign;
+	double val, power, exponent;
 
-    if(input[i] == '-' || input[i] == '+')
-        ++i;
-
-    for(exponent = 0.0; digit(input[i]); ++i)
-        exponent = (exponent * 10) + (input[i] - '0');
-
-    exponent *= powersign;
-    power *= mypow(10.0, exponent);
-    return sign * result * power;
+	/* remove leading whitespace characters */
+	for (i = 0; s[i] == ' '; ++i)
+		;
+	sign = (s[i] == '-') ? -1 : 1;
+	if (s[i] == '-' || s[i] == '+')
+		++i;
+	for (val = 0.0; s[i] >= '0' && s[i] <= '9'; ++i)
+		val = 10 * val + (s[i] - '0');
+	if (s[i] == '.')
+		++i;
+	for (power = 1.0; s[i] >= '0' && s[i] <= '9'; ++i) {
+		val = 10 * val + (s[i] - '0');
+		power *= 10.0;
+	}
+	if (s[i] == 'e' || s[i] == 'E')
+		++i;
+	exp_sign = (s[i] == '-') ? -1 : 1;
+	if (s[i] == '-' || s[i] == '+')
+		++i;
+	for (exponent = 0; s[i] != '\0'; ++i)
+		exponent = exponent * 10 + (s[i] - '0');
+	exponent *= exp_sign;
+	/* combining power and exponent together to form a single power */
+	while (exponent) {
+		if (exp_sign == -1) {
+			power *= 10;
+			++exponent;
+		}
+		else{
+			power /= 10;
+			--exponent;
+		}
+	}
+	return val/power * sign;
 }
 
-double mypow(double base, double pow){
-    double result = 1.0;
-    int sign = 1;
-    double i;
-    if(pow < 0){
-        sign = -1;
-        pow = -pow;
-    }
-    while(pow--){
-        result *= base; 
-    }
-    return (sign) ? (1/result) : result;
-}
-
-/* ctype.h has a function isspace(c) */
-int whitespace(char c){
-    return (c == ' ' || c == '\n' || c == '\t');
-}
-
-/* ctype.h has a function isdigit(c) */
-int digit(char c){
-    return (c >= '0' && c <= '9');
-}
+/* a comment on format specifiers for double datatype
+ * assume number = 1456.23e-03
+ * %f will print it in fractional format i.e. 1.45623
+ * %e or %E will print it in scientific notation i.e. 1.456230e+00 or 1.456230E+00 accordingly
+ * %g or %G will print the number in fractional format if the number is in certain range or in scientific notation
+ * if the number is out of that range. In this example itll print 1.45623
+ */
