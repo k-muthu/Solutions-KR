@@ -1,325 +1,253 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<ctype.h>
-#include<math.h>
+#include <stdio.h>
+#include <math.h>
 
-/* Excercise 4-10 getop is modified to be compatible with getline rather than getch and ungetch*/
+#define MAXOP 100	/* max size of operator or operand */
+#define NUMBER '0'	/* signal that a number was found */
+#define FUNCTION '1'	/* signal that a math library function was found */
+#define VARIABLE '2'	/* signal that a variable is found */
+#define PRINT 26	/* variable that holds the value of whatever is printed */
 
-#define MAXOP 100   /* max size of operand or operator*/
-#define NUMBER '0'
-#define VARIABLE 'v'
-#define TRUE 1
-#define FALSE 0
-#define STACKSIZE 100
-#define BUFFERSIZE 100
-#define MAXLINE 1000
-
-int operation = 0;
-char line[MAXLINE];
-int ptr = -1;
-
-int getop(char s[]);
-void push(double number);
+double myatof(char []);
+int mygetop(char []);
+void push(double);
 double pop(void);
-void printtop(void);
-void clearstack(void);
-void swaptop2(void);
-void duplicatestack(void);
-int functions(char s[]);
-int compare(char s1[], char s2[]);
-void initializer(int a[], int value, int length);
-int mygetline(char s[], int max);
+int compare(char [], char []);
 
-int main(){
-    int type;
-    double op2;
-    char s[MAXOP];
-    extern int var_set[26];
-    extern double variables[27];
-    extern int initialize;
-    initializer(var_set, 0, 26);
-    printf("Reverse Polish notation calculator\n");
-    printf("Variable allowed(a-z), initializing rule for variable : \"variable_name\"=\"value\" \n");
-    printf("clearvariables command required before a used variable can be reassigned\n");
+/* reverse polish calculator */
+int main()
+{
+	int type;
+	double op2;
+	char s[MAXOP];
+	extern double var[];
 
-    while(mygetline(line, MAXLINE) > 0){
-        while((type = getop(s)) != '\0'){
-            switch(type){
-                case NUMBER :
-                    push(atof(s));
-                    operation = 0;
-                    break;
-                
-                case '+' : 
-                    push(pop() + pop());
-                    operation = 1;
-                    break;
-
-                case '*' :
-                    push(pop() * pop());
-                    operation = 1;
-                    break;
-
-                case '-' :
-                    op2 = pop();
-                    push(pop() - op2);
-                    operation = 1;
-                    break;
-
-                case '/' : 
-                    op2 = pop();
-                    if(op2 != 0.0){
-                        push(pop() / op2);
-                        operation = 1;
-                    }   
-                    else
-                        printf("error : Trying to divide by zero");
-                    break;
-
-                case '%' : 
-                    op2 = pop();
-                    push(fmod(pop(), op2));
-                    operation = 1;
-                    break;
-                
-                case '\n' :
-                    if(operation){
-                        variables[26] = pop();
-                        printf("Answer : %g\n", variables[26]);
-                    }
-                    operation = 0;
-                    break;
-                
-                case '1' :
-                    push(sin(pop()));
-                    operation = 1;
-                    break;
-
-                case '2' :
-                    push(exp(pop()));
-                    operation = 1;
-                    break;
-                
-                case '3' :
-                    op2 = pop();
-                    push(pow(pop(), op2));
-                    operation = 1;
-                    break;
-                
-                case '4' :
-                    initializer(var_set, 0, 26);
-                    operation = 0;
-                    break;
-                
-                case '5' :
-                    printtop();
-                    operation = 0;
-                    break;
-
-                case '6' :
-                    clearstack();
-                    operation = 0;
-                    break;
-
-                case '7' :
-                    swaptop2();
-                    operation = 0;
-                    break;
-
-                case '8' :
-                    duplicatestack();
-                    operation = 0;
-                    break;
-
-                case VARIABLE :
-                    if(var_set[initialize]){
-                        push(variables[initialize]);
-                    }
-                    else{
-                        var_set[initialize] = 1;
-                        variables[initialize] = atof(s);
-                    }
-                    operation = 0;
-                    break;
-                
-                defult : 
-                    printf("Unknown operation");
-                    operation = 0;
-                    break;
-            }
-        }
-        ptr = -1;
-    }
-    return 0;
+	while ((type = mygetop(s)) != EOF) {
+		switch (type) {
+			case NUMBER:
+				push(myatof(s));
+				break;
+			case FUNCTION:
+				if (compare(s, "sin"))
+					push(sin(pop()));
+				else if (compare(s, "exp"))
+					push(exp(pop()));
+				else if (compare(s, "pow")) {
+					op2 = pop();
+					push(pow(pop(), op2));
+				}
+				break;
+			case VARIABLE:
+				push(var[s[0] - 'a']);
+				break;
+			case '+':
+				push(pop() + pop());
+				break;
+			case '*':
+				push(pop() * pop());
+				break;
+			case '-':
+				op2 = pop();
+				push(pop() - op2);
+				break;
+			case '/':
+				op2 = pop();
+				if (op2 == 0.0)
+					printf("zero division error\n");
+				else
+					push(pop() / op2);
+				break;
+			case '%':
+				op2 = pop();
+				if (op2 == 0.0)
+					printf("zero modulo error\n");
+				else
+					push(((int)pop()) % ((int)op2));
+				break;
+			case '\n':
+				var[PRINT] = pop();
+				printf("%g\n", var[PRINT]);
+				break;
+			default:
+				printf("ERROR\n");
+				break;
+		}
+	}
+	return 0;
 }
 
+int compare(char s[], char t[])
+{
+	int i;
 
-int sp = 0; /* The next free stack position */
-double stack[STACKSIZE];
-double variables[27];
-int var_set[26];
-int initialize = -1;
-
-void push(double number){
-    if(sp < STACKSIZE)
-        stack[sp++] = number;
-    else
-        printf("error : stack full, cant add %g to stack\n", number);
+	for (i = 0; (s[i] == t[i]) && s[i] != '\0' && t[i] != '\0'; ++i)
+		;
+	if (s[i] == '\0' && t[i] == '\0')
+		return 1;
+	else
+		return 0;
 }
 
-double pop(void){
-    if(sp){
-        return stack[--sp];
-    }
-    else{
-        printf("error : stack empty, nothing to pop\n");
-        return 0.0;
-    }
+#define MAXVAL 100	/* max depth of stack */
+
+int sp = 0;	/* next free position in stack */
+double stack[MAXVAL];	/* the stack that holds the values */
+
+/* push : push the number onto the stack */
+void push(double num)
+{
+	if (sp < MAXVAL)
+		stack[sp++] = num;
+	else
+		printf("error : stack full, cant push %g\n", num);
 }
 
-/* printtop : prints the top element in the stack(Excercise 4-4) */
-void printtop(void){
-    if(sp){
-        printf("Top of Stack : %g\n", stack[sp - 1]);
-    }
-    else{
-        printf("stack empty");
-    }
+/* pop : returns the top of the stack */
+double pop(void)
+{
+	if (sp > 0)
+		return stack[--sp];
+	else {
+		printf("error : stack empty\n");
+		return 0.0;
+	}
 }
 
-/* clearstack : empties the stack(Excercise 4-4)*/
-void clearstack(void){
-    printf("Stack cleared\n");
-    sp = 0;
+#define NOV 27	/* no of variables */
+double var[NOV];
+
+#define MAXLINE 40
+
+int lineempty;
+int ind;
+int length;
+char line[MAXLINE];
+
+int mygetline(char [], int);
+
+int mygetop(char s[])
+{
+	int c, i, j;
+	char variable = '\0';
+
+	if (!lineempty) {
+		length = mygetline(line, MAXLINE);
+		ind = 0;
+		lineempty = 1;
+	}
+	if (length > 0) {
+		while ((s[0] = c = line[ind++]) == ' ' || c == '\t')
+			;
+		s[1] = '\0';
+		i = 0;
+		/* checking for a variable or a math function */
+		if (c >= 'a' && c <= 'z') {
+			while ((s[++i] = c = line[ind++]) >= 'a' && c <= 'z')
+				;
+			/* variable assignment found */
+			if (c == '=') {
+				variable = s[i - 1];
+				s[0] = c = line[ind++];
+			}
+			/* performing operations on variables */
+			else if (i == 1) {
+				--ind;
+				variable = s[0];
+				s[i] = '\0';
+				return VARIABLE;
+			}
+			/* math function found */
+			else {
+				--ind;
+				s[i] = '\0';
+				return FUNCTION;
+			}
+		}
+		/* checking for basic math operations or a newline */
+		if (!(c >= '0' && c <= '9') && c != '.' && c != '-' && variable == '\0') {
+			//printf("wanted : %d\n", (c == ' ') ? 'y' : c);
+			if (c == '\n') {
+				lineempty = 0;
+			}
+			return c;	/* not a number */
+		}
+		/* checking if '-' is subtraction or part of a negative number */
+		if (c == '-') {
+			c = line[ind++];
+			--ind;
+			if (!(c >= '0' && c <= '9'))
+				return '-';
+		}
+		i = 0;
+		/* collecting numbers into array */
+		if (c >= '0' && c <= '9')
+			while ((s[++i] = c = line[ind++]) >= '0' && c <= '9')
+				;
+		if (c == '.')
+			while ((s[++i] = c = line[ind++]) >= '0' && c <= '9')
+				;
+		s[i] = '\0';
+		if (c != EOF)
+			--ind;
+		/* variable assignment */
+		if (variable != '\0') {
+			var[variable - 'a'] = myatof(s);
+			s[0] = variable;
+			s[1] = '\0';
+			return VARIABLE;
+		}
+		return NUMBER;
+	}
+	return EOF;
 }
 
-/* swaptop2 : swaps the top 2 elements of the stack(Excercise 4-4) */
-void swaptop2(void){
-    if(sp > 0){
-        int op1, op2;
-        op2 = pop();    /* The top element of the stack */
-        op1 = pop();
-        push(op2);
-        push(op1);
-    }
-    else
-        printf("stack empty");
+int mygetline(char line[], int max)
+{
+	int i, c;
+
+	i = 0;
+	while (--max > 0 && (c = getchar()) != EOF && c != '\n')
+		line[i++] = c;
+	if (c == '\n')
+		line[i++] = '\n';
+	line[i] = '\0';
+	return i;
 }
 
-/* duplicatestack : duplicates the top element in the stack provided if theres any (Excercise 4-4)*/
-void duplicatestack(void){
-    int top;
-    if(sp){
-        push(top = pop());
-        push(top);
-    }
-    else{
-        printf("stack empty\n");
-    }
-}
+double myatof(char s[])
+{
+	int i, sign, exp_sign;
+	double mantissa, exponent, power;
 
-int mygetline(char s[], int max){
-    int i, c;
-    for(i = 0; i < (max - 1) && (c = getchar()) != EOF && c != '\n'; ++i){
-        s[i] = c;
-    }
-    if(c == '\n')
-        s[i++] = '\n';
-    s[i] = '\0';
-    return i;
-}
-
-int getop(char s[]){
-    int i, c, j;
-    initialize = -1;
-    while((s[0] = c = line[++ptr]) == ' ' || c == '\t');
-    s[1] = '\0';
-    if(isalpha(c)){
-        i = 0;
-        while(isalpha(s[++i] = c = line[++ptr]));
-        if(c == '=' && i == 1){
-            initialize = s[0] - 'a';
-            s[0] = c = line[++ptr];
-        }
-        else if(c == ' ' && i == 1){
-            initialize = s[0] - 'a';
-            s[1] = '\0';
-            return VARIABLE;
-        }
-        else{
-            --ptr;
-            s[i] = '\0';
-            return functions(s);
-        }
-    }
-    if(c == '-'){
-        c = line[++ptr];
-        --ptr;
-        if(!isdigit(c)){    /* To check if there is a negative number */
-            return '-';
-        }
-    }
-
-    if(!isdigit(c) && c != '.' && c!= '-')
-        return c;
-
-    i = 0;
-    if(isdigit(c) || c == '-')
-        while(isdigit(s[++i] = c = line[++ptr]));
-
-    if(c == '.')
-        while(isdigit(s[++i] = c = line[++ptr]));
-
-    s[i] = '\0';
-    
-    if(initialize >= 0 && initialize <= 26){
-        return VARIABLE;
-    }
-
-    return NUMBER;
-}
-
-/* compare : a simple version of the library function strcmp */
-int compare(char s1[], char s2[]){
-    int i, j;
-    i = j = 0;
-    while((tolower(s1[i]) == tolower(s2[j])) && s1[i] != '\0' && s2[j] != '\0'){
-        ++i;
-        ++j;
-    }
-    if(!i && !j)
-        return -1;  /* Both strings are emoty */
-    else if(s1[i] == '\0' && s2[j] == '\0')
-        return 1;
-    else
-        return 0;
-
-}
-
-int functions(char s[]){
-    int type;
-    if(compare(s, "sin") > 0)
-        return '1';
-    if(compare(s, "exp") > 0)
-        return '2';
-    if(compare(s, "pow") > 0)
-        return '3';
-    if(compare(s, "clearvariables") > 0)
-        return '4';
-    if(compare(s, "printtop") > 0)
-        return '5';
-    if(compare(s, "clearstack") > 0)
-        return '6';
-    if(compare(s, "swaptop2") > 0)
-        return '7';
-    if(compare(s, "duplicatestack") > 0)
-        return '8';
-    
-    return -1;
-}
-
-void initializer(int a[], int value, int length){
-    int i;
-    for(i = 0; i < length; ++i)
-        a[i] = value;
+	for (i = 0; s[i] == ' ' || s[i] == '\t'; ++i)
+		;
+	sign = (s[i] == '-') ? -1 : 1;
+	if (s[i] == '-' || s[i] == '+')
+		++i;
+	for (mantissa = 0.0; s[i] >= '0' && s[i] <= '9'; ++i)
+		mantissa = 10 * mantissa + (s[i] - '0');
+	if (s[i] == '.')
+		++i;
+	for (power = 1.0; s[i] >= '0' && s[i] <= '9'; ++i) {
+		mantissa = 10 * mantissa + (s[i] - '0');
+		power *= 10.0;
+	}
+	if (s[i] == 'e' || s[i] == 'E')
+		++i;
+	exp_sign = (s[i] == '-') ? -1 : 1;
+	if (s[i] == '+' || s[i] == '-')
+		++i;
+	for (exponent = 0.0; s[i] >= '0' && s[i] <= '9'; ++i)
+		exponent = 10 * exponent + (s[i] - '0');
+	exponent *= exp_sign;
+	while (exponent) {
+		if (exp_sign == -1) {
+			power *= 10.0;
+			++exponent;
+		}
+		else {
+			power /= 10.0;
+			--exponent;
+		}
+	}
+	return sign * (mantissa / power);
 }
