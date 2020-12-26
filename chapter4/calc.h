@@ -1,12 +1,11 @@
-#define NUMBER '0'
-#define VARIABLE 'v'
+#define NUMBER '0'	/* signal that a number was found */
+#define FUNCTION '1'	/* signal that a math library function was found */
+#define VARIABLE '2'	/* signal that a variable is found */
+#define PRINT 26	/* variable that holds the value of whatever is printed */
 
-int getop(char s[]);
-void push(double number);
+double myatof(char []);
+void push(double);
 double pop(void);
-void printtop(void);
-void clearstack(void);
-void swaptop2(void);
-void duplicatestack(void);
+int mygetop(char []);
 int getch(void);
-void ungetch(int c);
+void ungetch(int);
